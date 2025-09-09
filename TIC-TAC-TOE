@@ -1,23 +1,28 @@
+import random
+
 def print_board(board):
     for row in board:
         print(" | ".join(row))
         print("-" * 9)
 
 def check_winner(board, player):
-    # Check rows, columns, diagonals
     for i in range(3):
-        if all([cell == player for cell in board[i]]):  # Row
+        if all([cell == player for cell in board[i]]):
             return True
-        if all([board[j][i] == player for j in range(3)]):  # Column
+        if all([board[j][i] == player for j in range(3)]):
             return True
-    if all([board[i][i] == player for i in range(3)]):  # Diagonal
+    if all([board[i][i] == player for i in range(3)]):
         return True
-    if all([board[i][2 - i] == player for i in range(3)]):  # Other diagonal
+    if all([board[i][2 - i] == player for i in range(3)]):
         return True
     return False
 
 def is_board_full(board):
     return all(cell != " " for row in board for cell in row)
+
+def get_ai_move(board):
+    available_moves = [(r, c) for r in range(3) for c in range(3) if board[r][c] == " "]
+    return random.choice(available_moves) if available_moves else None
 
 def tic_tac_toe():
     board = [[" "]*3 for _ in range(3)]
@@ -25,26 +30,40 @@ def tic_tac_toe():
 
     while True:
         print_board(board)
-        print(f"Player {current_player}'s turn")
 
-        try:
-            row = int(input("Enter row (1-3): ")) - 1
-            col = int(input("Enter column (1-3): ")) - 1
-            if row not in range(3) or col not in range(3):
-                print("Invalid input. Please enter values between 1 and 3.")
+        if current_player == "X":
+            # User move
+            print("Your turn (X)")
+            try:
+                row = int(input("Enter row (1-3): ")) - 1
+                col = int(input("Enter column (1-3): ")) - 1
+                if row not in range(3) or col not in range(3):
+                    print("Invalid input. Please enter values between 1 and 3.")
+                    continue
+                if board[row][col] != " ":
+                    print("Cell already taken. Choose another.")
+                    continue
+            except ValueError:
+                print("Please enter numeric values.")
                 continue
-            if board[row][col] != " ":
-                print("Cell already taken. Choose another.")
-                continue
-        except ValueError:
-            print("Please enter numeric values.")
-            continue
+            board[row][col] = "X"
 
-        board[row][col] = current_player
+        else:
+            # AI move
+            print("AI's turn (O)")
+            move = get_ai_move(board)
+            if move is None:
+                print("No moves left, it's a tie!")
+                break
+            row, col = move
+            board[row][col] = "O"
 
         if check_winner(board, current_player):
             print_board(board)
-            print(f"Player {current_player} wins!")
+            if current_player == "X":
+                print("Congratulations! You win!")
+            else:
+                print("AI wins!")
             break
 
         if is_board_full(board):
